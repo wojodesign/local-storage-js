@@ -1,0 +1,19 @@
+/**********************************************************/
+	Gracefully Degrading HTML5 Local Storage 
+/**********************************************************/
+Brett Wejrowski
+The Wojo Group
+thewojogroup.com
+brett@wejrowski.com
+
+
+This script uses two functions, save() and read(), in order to
+store name value pairs localally.  The script uses HTML5's 
+localStorage when it is supported, and will use a string of
+name/value pairs in cookies otherwise.  
+
+save( "Username" , "Joe Schmoe" );
+
+read( "Username" );  // returns "Joe Schmoe";
+
+
