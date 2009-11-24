@@ -1,13 +1,11 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US">
 <head>
 <title>
 Local Storage Test
 </title>
-<script type="text/javascript">
- 	function $(name){
-		return document.getElementById(name);
-	}
-</script>
 <script src="storage.js" type="text/javascript"></script>
 
 </head>
@@ -15,9 +13,11 @@ Local Storage Test
 <h3>Save:</h3><br/>
 name:<input type="text" id="saveName" /><br/>
 value:<input type="text"  id="saveValue" /><br/>
-<input type="button" value="save" onclick="javascript:save( $('saveName').value , $('saveValue').value );" /> <br/><br/>
+<input type="button" value="save" onclick="save( document.getElementById('saveName').value , document.getElementById('saveValue').value ); return false;" /> <br/><br/>
 <h3>Read</h3><br/>
 name:<input type="text" id="readName" /><br/>
 value: <span id="readValue"></span><br/>
-<input type="button" value="read" onclick="javascript:$('readValue').innerHTML = read( $('readName').value );" /> <br/>
+<input type="button" value="read" onclick="document.getElementById('readValue').innerHTML = read( document.getElementById('readName').value );return false;" /> <br/>
+</body>
+</html>
 
