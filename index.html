@@ -1,0 +1,23 @@
+<html>
+<head>
+<title>
+Local Storage Test
+</title>
+<script type="text/javascript">
+ 	function $(name){
+		return document.getElementById(name);
+	}
+</script>
+<script src="storage.js" type="text/javascript"></script>
+
+</head>
+<body>
+<h3>Save:</h3><br/>
+name:<input type="text" id="saveName" /><br/>
+value:<input type="text"  id="saveValue" /><br/>
+<input type="button" value="save" onclick="javascript:save( $('saveName').value , $('saveValue').value );" /> <br/><br/>
+<h3>Read</h3><br/>
+name:<input type="text" id="readName" /><br/>
+value: <span id="readValue"></span><br/>
+<input type="button" value="read" onclick="javascript:$('readValue').innerHTML = read( $('readName').value );" /> <br/>
+
