@@ -8,8 +8,153 @@ Local Storage Test
 </title>
 <script src="storage.js" type="text/javascript"></script>
 
+
+<script type="text/javascript">
+
+//<![CDATA[
+function test( test , testName , error ){
+	var info = "Passed!";
+	try{	
+		var result = test.call(window);
+	} catch(err) {
+		info = "(Error: " + err;
+	}
+	if( !result )
+		info = error;
+	$("resultList").appendChild( createResultElement( "<strong>" + testName + ":</strong> " + info ) );
+}
+
+function $(id){
+	return document.getElementById(id);
+}
+
+function error( error ){
+	try{console.log( error );}catch( err ){}
+}
+
+function createResultElement( text ){
+	var li = document.createElement("li");
+	if( text.match(/error/i) )
+		li.style.color = "#f00";
+	li.innerHTML = text;
+	return li;
+}
+
+
+var tests = [
+	{	test: function() {
+			if( typeof( save ) !== "function" || typeof( read ) !== "function" || typeof( remove ) !== "function" || typeof( clear ) !== "function" )
+				return false;
+			return true;
+		},
+		name: "Functions Created",
+		error: "Storage functions not created or accessible"
+	},
+	
+	{	test: function() {
+			try{ 
+				save( "Name" , "Joe" );
+			} catch (err){
+				error( err );
+				return false;
+			}
+			return true;
+		},
+		name: "Storing New Value",
+		error: "Name value pair not saved properly"
+	},
+	
+	{	test: function() {
+		 	clear();
+			save( "Name" , "Joe" );
+			return read( "Name" ) == "Joe";
+		},
+		name: "Reading",
+		error: "Correct value not read after save"
+	},
+	
+	{	test: function() {
+		 	clear();
+			save( "Name" , "Joe" );
+			remove( "Name" );
+			return read( "Name" ) == null;
+		},
+		name: "Deleting",
+		error: "Could not delete one value"
+	},
+	
+	{	test: function() {
+			clear();
+			save( "Name" , "Joe" );
+			save( "Name" , "Bob") ;
+			if( read("Name") != "Bob" )
+				return false;
+			return true;
+		},
+		name: "Updating Value",
+		error: "Name value pair not updated properly"
+	},
+	
+	
+	{	test: function() {
+		 	clear();
+			save( "Name" , "Joe" );
+			save( "Awesome" , "True" );
+			
+			clear();
+			if( !read("Name") && !read("Awesome") )	
+				return true;
+			return false;
+		},
+		name: "Clearing",
+		error: "Did not Clear properly"
+	},
+	
+	{	test: function() {
+			clear();
+			var testString = "";
+			for( var x=0;x<1000;x++ )
+				testString += "Awesome" + x;
+			save( "LongString" , testString );
+			if( testString != read( "LongString" ) )
+				return false;
+			return true;
+		},
+		name: "Saving Long Value",
+		error: "Did not save or load long value properly"
+	},
+	
+	{	test: function() {
+			clear();
+			for( var x=0;x<1000;x++ )
+				save( "Name" + x , "Bob" + x );
+			
+			for( var x=0; x< 1000; x++ )
+				if( read( "Name" + x ) != ("Bob" + x ) )
+					return false;
+			return true;
+		},
+		name: "Saving Lots of Values",
+		error: "Could not save lots of name/value pairs"
+	}
+	
+];
+
+function runTests(){
+	for( var x=0,xlen=tests.length;x<xlen;x++)
+		test( tests[x]['test'] , tests[x]['name'] , tests[x]['error'] );
+}
+
+//]]>
+
+</script>
 </head>
 <body>
+	<a href="javascript:runTests();" >Run Tests</a>
+<h3>Tests: </h3>
+<ul id="resultList">
+</ul>
+	
 <h3>Save:</h3><br/>
 name:<input type="text" id="saveName" /><br/>
 value:<input type="text"  id="saveValue" /><br/>

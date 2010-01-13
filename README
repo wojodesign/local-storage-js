@@ -7,8 +7,8 @@ thewojogroup.com
 brett@wejrowski.com
 
 
-This script uses two functions, save() and read(), in order to
-store name value pairs localally.  The script uses HTML5's 
+This script uses four functions, save(), read(), remove(), and clear(), in order to
+store name value pairs locally.  The script uses HTML5's 
 localStorage when it is supported, and will use a string of
 name/value pairs in cookies otherwise.  
 
@@ -16,4 +16,6 @@ save( "Username" , "Joe Schmoe" );
 
 read( "Username" );  // returns "Joe Schmoe";
 
+remove( "Username" ); // deletes data item "Username"
 
+clear(); // deletes all local storage data
