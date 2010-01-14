@@ -7,15 +7,31 @@ thewojogroup.com
 brett@wejrowski.com
 
 
-This script uses four functions, save(), read(), remove(), and clear(), in order to
-store name value pairs locally.  The script uses HTML5's 
-localStorage when it is supported, and will use a string of
-name/value pairs in cookies otherwise.  
+The script implements a replacement for HTML5's localStorage, when it is not supported, 
+by using strings of name/value pairs that are stored in cookies.  It implements a nearly
+identical interface.  You can find the spec of the HTML5 storage at 
+	http://www.w3.org/TR/2009/WD-webstorage-20091222/
+	
 
-save( "Username" , "Joe Schmoe" );
 
-read( "Username" );  // returns "Joe Schmoe";
+localStorage.setItem( key , value );
+// saves a new name/value pair if the key doesn't exist, otherwise
+// updates the value
 
-remove( "Username" ); // deletes data item "Username"
+localStorage.getItem( key );
+// returns the value associated with the given key, if it exists
+// returns null if the key doesn't exist
 
-clear(); // deletes all local storage data
+localStorage.length;
+// the number of unique keys stored 
+
+localStorage.removeItem( key );
+// deletes the name/value pair with the given key, if it exists
+// if it does not exist, exits
+
+localStorage.clear();
+// delete all name/value pairs currently stored
+
+localStorage.key( n );
+// returns the name of the nth key in the list, will return null if n is
+// greater than or equal to localStorage.length
