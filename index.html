@@ -43,7 +43,7 @@ function createResultElement( text ){
 
 var tests = [
 	{	test: function() {
-			if( typeof( save ) !== "function" || typeof( read ) !== "function" || typeof( remove ) !== "function" || typeof( clear ) !== "function" )
+			if( typeof( localStorage ) == "undefined" || typeof( localStorage.setItem ) !== "function" || typeof( localStorage.getItem ) !== "function" || typeof( localStorage.clear ) !== "function" || typeof( localStorage.key ) !== "function" || typeof( localStorage.removeItem ) !== "function" )
 				return false;
 			return true;
 		},
@@ -52,8 +52,9 @@ var tests = [
 	},
 	
 	{	test: function() {
+			localStorage.clear();
 			try{ 
-				save( "Name" , "Joe" );
+				localStorage.setItem( "Name" , "Joe" );
 			} catch (err){
 				error( err );
 				return false;
@@ -65,29 +66,29 @@ var tests = [
 	},
 	
 	{	test: function() {
-		 	clear();
-			save( "Name" , "Joe" );
-			return read( "Name" ) == "Joe";
+		 	localStorage.clear();
+			localStorage.setItem( "Name" , "Joe" );
+			return localStorage.getItem( "Name" ) == "Joe";
 		},
 		name: "Reading",
 		error: "Correct value not read after save"
 	},
 	
 	{	test: function() {
-		 	clear();
-			save( "Name" , "Joe" );
-			remove( "Name" );
-			return read( "Name" ) == null;
+		 	localStorage.clear();
+			localStorage.setItem( "Name" , "Joe" );
+			localStorage.removeItem( "Name" );
+			return localStorage.getItem( "Name" ) == null;
 		},
 		name: "Deleting",
 		error: "Could not delete one value"
 	},
 	
 	{	test: function() {
-			clear();
-			save( "Name" , "Joe" );
-			save( "Name" , "Bob") ;
-			if( read("Name") != "Bob" )
+			localStorage.clear();
+			localStorage.setItem( "Name" , "Joe" );
+			localStorage.setItem( "Name" , "Bob") ;
+			if( localStorage.getItem("Name") != "Bob" )
 				return false;
 			return true;
 		},
@@ -97,12 +98,12 @@ var tests = [
 	
 	
 	{	test: function() {
-		 	clear();
-			save( "Name" , "Joe" );
-			save( "Awesome" , "True" );
+		 	localStorage.clear();
+			localStorage.setItem( "Name" , "Joe" );
+			localStorage.setItem( "Awesome" , "True" );
 			
-			clear();
-			if( !read("Name") && !read("Awesome") )	
+			localStorage.clear();
+			if( !localStorage.getItem("Name") && !localStorage.getItem("Awesome") )	
 				return true;
 			return false;
 		},
@@ -111,12 +112,12 @@ var tests = [
 	},
 	
 	{	test: function() {
-			clear();
+			localStorage.clear();
 			var testString = "";
 			for( var x=0;x<1000;x++ )
 				testString += "Awesome" + x;
-			save( "LongString" , testString );
-			if( testString != read( "LongString" ) )
+			localStorage.setItem( "LongString" , testString );
+			if( testString != localStorage.getItem( "LongString" ) )
 				return false;
 			return true;
 		},
@@ -125,17 +126,66 @@ var tests = [
 	},
 	
 	{	test: function() {
-			clear();
+			localStorage.clear();
 			for( var x=0;x<1000;x++ )
-				save( "Name" + x , "Bob" + x );
+				localStorage.setItem( "Name" + x , "Bob" + x );
 			
 			for( var x=0; x< 1000; x++ )
-				if( read( "Name" + x ) != ("Bob" + x ) )
+				if( localStorage.getItem( "Name" + x ) != ("Bob" + x ) )
 					return false;
 			return true;
 		},
 		name: "Saving Lots of Values",
 		error: "Could not save lots of name/value pairs"
+	}, 
+	
+	
+	{	test: function() {
+			localStorage.clear();
+			var myKeys = [];
+			for( var x=0;x<45;x++ ){
+				localStorage.setItem( "Name" + x , "Bob" + x );
+				myKeys.push( "Name" + x );
+			}
+			
+			var x=0;
+			while( x<45 ){
+				var tempKeys = [];
+				for( var j=0,jlen=myKeys.length;j<jlen;j++)
+					if( localStorage.key(x) != myKeys[j] )
+						tempKeys.push(myKeys[j]);
+				
+				x++;
+				myKeys=tempKeys;
+			}
+			
+			return ( myKeys.length == 0);
+		},
+		name: "Key Returns Proper Indices",
+		error: "Key function did not return proper index"
+	},
+	
+	{	test: function() {
+			localStorage.clear();
+			var myLen=14;
+			for( var x=0;x<myLen;x++ )
+				localStorage.setItem( "Name" + x , "Bob" + x );
+			if( localStorage.length != myLen )
+				return false;
+				
+				
+			localStorage.clear();
+			var myLen = 95;
+			for( var x=0; x< myLen; x++ )
+				localStorage.setItem( "Name" + x , "Bob" + x );
+			if( localStorage.length != myLen )
+				return false;
+				
+			localStorage.clear();
+			return true;
+		},
+		name: "Checking Length Property",
+		error: "Length Property is Not Updating properly"
 	}
 	
 ];
