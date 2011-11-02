@@ -1,140 +1,88 @@
 /*
-Copyright (c) 2009 The Wojo Group
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
+Copyright (c) 2011 Wojo Design
+Dual licensed under the MIT or GPL licenses.
 */
 (function(){
 	var window = this;
-	if( !window.localStorage && navigator.cookieEnabled ){		
-		var expiresAt = 30*24*60*60,
-			maxCookieSize = 4000,
-			prefix = "storageData_",
-			nameValueDelim = "::",
-			itemDelim = "++",
-		
-		createCookie = function(name,value,expire) {
-			var date = new Date();
-			date.setTime(date.getTime() + expire);
-			var expires = "; expires=" + date.toGMTString();
-			document.cookie = name+"="+value+expires+"; path=/";
-		},
-		readCookie = function(name) {
-			var nameEQ = name + "=", ca = document.cookie.split(';');
-			for(var i=0,iLen=ca.length;i<iLen;i++) {
-				var c = ca[i];
-				while (c.charAt(0)==' ') c = c.substring(1,c.length);
-				if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length,c.length);
-			}
-			return null;
-		},
-		eraseCookie = function(name) {createCookie(name,"",-1);},
-		getAllCookieData = function(){
-			var data="",x=0;
-			while(readCookie(prefix+x) !== null)
-				data+=readCookie(prefix+x++);
-			return data == "" ? [] : data.split('++');
-		},
-		dataStringToCookies = function(data) {
-			var cookiesUsed = Math.ceil(data.length/maxCookieSize),
-				x=0;
-			while(x<cookiesUsed || readCookie(prefix+x) !== null){
-				if( x<cookiesUsed )
-					createCookie(prefix+x, data.substr(x*maxCookieSize, ((x+1)*maxCookieSize>data.length ? data.length-x*maxCookieSize : maxCookieSize )), expiresAt);     
-				else 
-					eraseCookie(prefix+x);
-				x++;
-			}
-		},
-		
+	// check to see if we have localStorage or not
+	if( !window.localStorage ){		
 
-		localStorage = window["localStorage"] = {
-			"length":0,
-			"setItem":function( key , value ){
-				var data=getAllCookieData(),x=0,xlen=data.length,exists=false;
-				for(x=0;x<xlen;x++){
-					var item = data[x].split(nameValueDelim);
-					if( item[0] == key ){
-						item[1] = value;
-						exists=true;
-						data[x] = item.join(nameValueDelim);
-						x=xlen;
+		// globalStorage
+		// non-standard: Firefox 2+
+		// https://developer.mozilla.org/en/dom/storage#globalStorage
+		if ( window.globalStorage ) {
+			// try/catch for file protocol in Firefox
+			try {
+				window.localStorage = window.globalStorage;
+			} catch( e ) {}
+			return;
+		}
+
+		// userData
+		// non-standard: IE 5+
+		// http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx
+		var div = document.createElement( "div" ),
+			attrKey = "localStorage";
+		div.style.display = "none";
+		document.getElementsByTagName( "head" )[ 0 ].appendChild( div );
+		if ( div.addBehavior ) {
+			div.addBehavior( "#default#userdata" );
+
+			var localStorage = window["localStorage"] = {
+				"length":0,
+				"setItem":function( key , value ){
+					div.load( attrKey );
+					key = cleanKey(key );
+				
+					if( !div.getAttribute( key ) ){
+						this.length++;
 					}
-				}
-				if( !exists ){
-					data.push(key + nameValueDelim + value.replace(/::/g,": :").replace(/\+\+/g, "+ +") );
-					this.keys.push(key);
-					this["length"]++;
+					div.setAttribute( key , value );
+				
+					div.save( attrKey );
+				},
+				"getItem":function( key ){
+					div.load( attrKey );
+					key = cleanKey(key );
+					return div.getAttribute( key );
+
+				},
+				"removeItem":function( key ){
+					div.load( attrKey );
+					key = cleanKey(key );
+					div.removeAttribute( key );
+				
+					div.save( attrKey );
+					this.length=0;
+				},
+			
+				"clear":function(){
+					div.load( attrKey );
+					var i = 0;
+					while ( attr = div.XMLDocument.documentElement.attributes[ i++ ] ) {
+						div.removeAttribute( attr.name );
+					}
+					div.save( attrKey );
+					this.length=0;
+				}, 
+			
+				"key":function( key ){
+					div.load( attrKey );
+					return div.XMLDocument.documentElement.attributes[ key ];
 				}
 
-				dataStringToCookies( data.join(itemDelim) );
 			},
-			"getItem":function( key ){
-				var data=getAllCookieData(),x=0,xlen=data.length,exists=false;
-				for(x=0;x<xlen;x++){
-					var item = data[x].split(nameValueDelim);
-					if( item[0] == key && !!item[1])
-						return item[1];
-				}
-				return null;
-			},
-			"removeItem":function( key ){
-				var data=getAllCookieData(),x=0,xlen=data.length,exists=false,tempData=[];
-				for(x=0;x<xlen;x++){
-					var item = data[x].split(nameValueDelim);
-					if( item[0] != key )
-						tempData.push(data[x]);
-					else 
-						exists=true;
-				}
-				if( !exists )
-					return;
-
-				dataStringToCookies( tempData.join(itemDelim) );
-				setKeysAndLength();
-			},
-			
-			"clear":function(){
-				var x=0;
-				while(readCookie(prefix+x) !== null)
-					eraseCookie(prefix+x++);
-				this.keys = [];
-				this["length"] = 0;
-			}, 
-			
-			"key":function( key ){
-				return key<this["length"] ? this.keys[key] : null;
-			},
-			
-			keys: []
-
-		},
 		
-		setKeysAndLength = function(){
-			localStorage.keys = getAllCookieData();
-			var x=0;
-			while( localStorage.keys[x] )
-				localStorage.keys[x] = localStorage.keys[x++].split("::")[0];
-
-			localStorage["length"] = localStorage.keys.length;
-		};
+			// convert invalid characters to dashes
+			// http://www.w3.org/TR/REC-xml/#NT-Name
+			// simplified to assume the starting character is valid
+			cleanKey = function( key ){
+				return key.replace( /[^-._0-9A-Za-z\xb7\xc0-\xd6\xd8-\xf6\xf8-\u037d\u37f-\u1fff\u200c-\u200d\u203f\u2040\u2070-\u218f]/g, "-" );
+			};
 		
-		setKeysAndLength();
-
+	
+			div.load( attrKey );
+			localStorage["length"] = div.XMLDocument.documentElement.attributes.length;
+		} 
 	} 
 })();
