@@ -53,7 +53,10 @@ Dual licensed under the MIT or GPL licenses.
 					div.removeAttribute( key );
 				
 					div.save( attrKey );
-					this.length=0;
+					this.length--;
+					if( this.length < 0){
+						this.length=0;
+					}
 				},
 			
 				"clear":function(){
