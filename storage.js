@@ -27,6 +27,7 @@ Dual licensed under the MIT or GPL licenses.
 		document.getElementsByTagName( "head" )[ 0 ].appendChild( div );
 		if ( div.addBehavior ) {
 			div.addBehavior( "#default#userdata" );
+			//div.style.behavior = "url('#default#userData')";
 
 			var localStorage = window["localStorage"] = {
 				"length":0,
