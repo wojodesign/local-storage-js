@@ -1,0 +1,10 @@
+{
+  "name": "local-storage-js",
+  "version": "0.0.1",
+  "main": "./storage.min.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ]
+}
